@@ -76,3 +76,53 @@ Here is an image to show the difference between the opening and the middle game 
 We can see that the bot has a good advantage in the opening, but loses it in the middle game. This is most likely due to the fact that the bot is not able to predict the best move in the middle game, as the number of possibilities is too high.
 
 Next step would be to increase the dataset size, by adding other games from other players, of a similar level to Hikaru Nakamura. This would allow the bot to learn more about the middle game and end game, and thus improve its performance.
+
+
+## javascript code for web console, for live game board fetcher
+
+```javascript
+// Define the getBoardState function
+function getBoardState() {
+    const pieces = document.querySelectorAll('.piece');
+    let boardState = [];
+    pieces.forEach(piece => {
+        let pieceClasses = Array.from(piece.classList);
+        let pieceClass = pieceClasses.find(cls => cls.length === 2); // 'wr', 'bp', etc.
+        let positionClass = pieceClasses.find(cls => cls.startsWith('square-')); // 'square-11'
+
+        if (!pieceClass || !positionClass) return;
+
+        let position = positionClass.split('-')[1];
+        let pieceType = pieceClass[1]; // 'r' for rook, 'p' for pawn, etc.
+        let color = pieceClass[0]; // 'w' for white, 'b' for black
+
+        pieceType = (color === 'w' ? pieceType.toUpperCase() : pieceType.toLowerCase());
+        boardState.push({ position: position, piece: pieceType });
+    });
+    return boardState;
+}
+
+// Define the sendBoardStateToPython function
+function sendBoardStateToPython() {
+    let boardState = getBoardState();
+    fetch('http://localhost:5000/update_board', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(boardState),
+    }).then(response => response.json())
+    .then(data => console.log(data));
+}
+
+// Set an interval to regularly update the board state and store the interval ID
+let intervalID = setInterval(sendBoardStateToPython, 1000);
+
+// Function to stop the interval loop (does not currently work, just refresh the page)
+function stopInterval() {
+    clearInterval(intervalID);
+    console.log('Interval stopped.');
+}
+```
+
+
