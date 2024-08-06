@@ -49,7 +49,8 @@ def board_to_string(board):
 def update_board_route():
     board_state = request.get_json()
     update_board(board_state)
-    print("Latest board state:\n" + board_to_string(board))  # Print the board in the desired format
+    string_board = board_to_string(board)
+    print("Latest board state:\n" + string_board)
     return jsonify({"status": "success"}), 200
 
 @app.route('/get_board', methods=['GET'])
